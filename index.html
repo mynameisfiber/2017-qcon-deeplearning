@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Practical Deep Learning</title>
+        <meta name="robots" content="noindex" />
+        <meta charset="utf-8">
+        <style>
+        @import url(fonts.css);
+        body { 
+            font-family: 'Roboto';
+        }
+        h1, h2, h3 {
+            font-family: 'Merriweather';
+            font-weight: normal;
+        }
+        li {
+            margin-top: 2ex;
+            //font-size: 1.2em;
+        }
+        .full-width {
+            padding-left: 0;
+            padding-right: 0;
+        }
+        .full-height {
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+        .full-bleed {
+            padding: 0;
+        }
+        img {
+            max-width: 90%;
+            max-height: 90%;
+        }
+        #cats {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            border: 0;
+            z-index: 1000;
+            height: 15%;
+        }
+
+        .remark-code-line:hover {
+            text-shadow: 1px 1px black;
+            background-color: rgba(95, 99, 34, 0.5);
+        }
+
+        .column:first-of-type {float:left;}
+        .column {float:right;}
+
+        .split-30 .column:first-of-type {width: 30%;}
+        .split-30 .column {width: 70%;}
+
+        .split-60 .column:first-of-type {width: 60%;}
+        .split-60 .column {width: 40%;}
+
+        .split-50 .column:first-of-type {width: 50%;}
+        .split-50 .column {width: 50%;}
+
+        code.has-jax {font: inherit; font-size: 100%; background: inherit; border: inherit;}
+        .remark-code, .remark-inline-code { font-family: 'Roboto Mono'; }
+        code {
+            text-align: left;
+        }
+        table {
+            width: 100%;
+            border: 1px solid;
+        }
+        td {
+            padding: 20px;
+        }
+        th {
+            border-right: 1px solid;
+        }
+        th:last-of-type {
+            border-right: 0;
+        }
+        </style>
+    </head>
+<body>
+    <script src="js/jquery-3.1.1.min.js"></script>
+    <script src="js/remark-latest.min.js"></script>
+    <!--<script src="js/MathJax-2.7.0/MathJax.js"></script>-->
+    <script src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntil=configured"></script>
+    <script>
+    var hljs = remark.highlighter.engine;
+    var slideshow = remark.create({
+              //ratio: '16:9',
+            highlightStyle: 'monokai',
+            highlightLanguage: 'python',
+            highlightLines: true,
+            sourceUrl: 'presentation.md'
+    });
+    // Setup MathJax
+    MathJax.Hub.Config({
+        tex2jax: {
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+            inlineMath: [['$','$'], ['\\(','\\)']]
+        }
+    });
+
+    MathJax.Hub.Queue(function() {
+        $(MathJax.Hub.getAllJax()).map(function(index, elem) {
+            return(elem.SourceElement());
+        }).parent().addClass('has-jax');
+    });
+    MathJax.Hub.Configured();
+    </script>
+
+    <!--
+    <img id='cats'>
+    <script>
+    var catImage = document.getElementById("cats");
+    function getRandomIntInclusive(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    function newCat(catIdx) {
+        catIdx = catIdx || getRandomIntInclusive(1, 17);
+        newImage = "images/catbackground/cat" +
+                   ("000" + catIdx).slice(-2) +
+                   ".png";
+        catImage.src = newImage;
+    }
+    setTimeout(function() {
+        newCat(6);
+        setInterval(newCat, 60 * 1000);
+    }, 30 * 1000);
+
+    </script>
+    -->
+  </body>
+</html>
