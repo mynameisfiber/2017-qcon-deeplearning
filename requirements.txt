@@ -1,0 +1,7 @@
+keras[visualize]
+h5py
+mmh3
+sklearn
+
+matplotlib
+seaborn
