@@ -8,20 +8,6 @@ class: center, middle
 
 ???
 
-So...
-
- - Summarization is intrinsically important
-
- - We built three working examples: one is extremely simple and demonstrates
-   the steps at a high level, one uses a ~10 year old innovation called topic
-   modelling, and one uses a couple of ~2 year old innovations called recurrent
-   neural networks and language embeddings)
-
- - Step 1 of any good summarization algorithm is also step 1 of any other
-   algorithm dealing with language, so these breakthroughs are important even
-   if you don't have a need for summarization. It's fundamental to working with
-   human language on computers.
-
 ---
 
 class: center, middle
@@ -29,6 +15,11 @@ class: center, middle
 # deep learning can seem *mysterious*
 
 <img src="images/magic.gif" width=100%>
+
+???
+
+Deep learning has been quite a hot topic lately, mainly fueled by it's almost
+unbelievable results
 
 ---
 
@@ -38,10 +29,9 @@ class: center, middle
 
 ???
 
-- At it's core though, deep learning methods all follow a simple principle:
-    - compose functions with weights that are learnable with SGD
-- Like finding the most general logistic regression possible
-
+- let's go backwards through history and just start with building a function
+- I think of ML as mainly data cleaning and finding a function (mathematical or
+  otherwise) that describes the data
 
 ---
 
@@ -50,72 +40,22 @@ class: center, middle
 ## Feed Forward Layer 
 
 ```
-def feed_forward(activation, input, weights, biases):
-    return activation(input @ weights + biases)
+# X.shape == (512,)
+# output.shape == (4,)
+# weights.shape == (512, 4) == 2048
+# biases.shape == (4,)
+def feed_forward(activation, X, weights, biases):
+    return activation(X @ weights + biases)
 ```
 
-IE: $ f(x) = \sigma \left( x \times W + b \right) $
+IE: $ f(X) = \sigma \left( X \times W + b \right) $
 
----
+???
 
-class: center, middle
-
-## Convolutional Layer
-
-```
-import numpy as np
-from scipy.signal import convolve
-
-def convnet(activation, input, filters, biases):
-    return activation(
-        np.stack([convolve(input, f)
-                  for f in filter])
-        + biases
-    )
-```
-
-IE: $ f(x) = \sigma \left( x \ast f + b \right) $
-
----
-
-class: center, middle
-
-## Recurrent Layer
-
-```
-def RNN(activation, input_sequence, W, U, biases, activation):
-    output = None
-    for input in input_sequence:
-        output = activation(x @ W + output @ U + biases)
-        yield output
-```
-
-IE: `$ f_t(x_t) = \sigma \left( x_t \times W + f_{t - 1}( x_{t - 1} ) \times U + b \right) $`
-
----
-
-class: center, middle
-
-## GRU Layer
-
-```
-def GRU(activation_in, activation_out, input_sequence,
-        W, U, biases):
-    output = None
-    for input in input_sequence:
-        z = activation_in(W[0] @ input +
-                          U[0] @ output +
-                          biases[0])
-        r = activation_in(W[1] @ input +
-                          U[1] @ output +
-                          biases[1])
-        o = activation_out(W[2] @ x +
-                           U[2] @ (r @ last_input) +
-                           biases[2])
-
-        last_output = z * output + (1 - z) * o
-        yield output
-```
+- Also called a fully-connected or a dense layer
+- This looks a lot like linear regression if we remove the `activation` function
+- Or maybe it looks a lot like logistic regression if we had a `softmax` function
+    - note: `softmax` == multidim logit
 
 ---
 
@@ -190,6 +130,10 @@ class: center, middle
 
 ### neural networks can approximate arbitrary functions
 
+???
+
+- this basically says that NN's can be
+
 ---
 
 class: center, middle
@@ -197,6 +141,14 @@ class: center, middle
 # differentiable ➡️️ SGD
 
 ### Iteratively learn the values for the weights and biases given training data
+
+???
+
+- "brute force"
+- Automatic differentiation means we can compute the important dWeights/dX in
+  order to do backpropogation
+- IE: Given example input/output, how can we iteratively tune the weights and
+  biases to get the best results
 
 ---
 
@@ -224,9 +176,110 @@ class: center, middle, full-bleed
 
 ---
 
+class: center, middle, full-bleed
+
+<img src="images/glasses.gif" height=680px>
+
+---
+
 class: center, middle
 
-# Where does theano/tensorflow/mxnet come into play?
+## Convolutional Layer
+
+```
+import numpy as np
+from scipy.signal import convolve
+
+# X.shape == (800, 600, 3)
+# filters.shape == (8, 8, 3, 16)
+# biases.shape == (3, 16)
+# output.shape < (792, 592, 16)
+def convnet(activation, X, filters, biases):
+    return activation(
+        np.stack([convolve(X, f)
+                  for f in filter])
+        + biases
+    )
+```
+
+IE: $ f(X) = \sigma \left( X \ast f + b \right) $
+
+???
+
+More complicated layers that you may have heard also are just as simple as our
+feed forward example!
+
+---
+
+class: center, middle, full-bleed
+
+<img src="images/conv.png" height=100%>
+
+---
+
+class: center, middle
+
+## Recurrent Layer
+
+```
+# X_sequence.shape == (None, 512)
+# output.shape == (None, 4)
+# W.shape == (512, 4)
+# U.shape == (4, 4)
+# biases.shape == (4,)
+def RNN(activation, X_sequence, W, U, biases, activation):
+    output = None
+    for X in X_sequence:
+        output = activation(x @ W + output @ U + biases)
+        yield output
+```
+
+IE: `$ f_t(X_t) = \sigma \left( X_t \times W + f_{t - 1}( X_{t - 1} ) \times U + b \right) $`
+
+---
+
+class: center, middle
+
+## GRU Layer
+
+```
+def GRU(activation_in, activation_out, X_sequence,
+        W, U, biases):
+    output = None
+    for X in X_sequence:
+        z = activation_in(W[0] @ X +
+                          U[0] @ output +
+                          biases[0])
+        r = activation_in(W[1] @ X +
+                          U[1] @ output +
+                          biases[1])
+        o = activation_out(W[2] @ x +
+                           U[2] @ (r @ output) +
+                           biases[2])
+
+        output = z * output + (1 - z) * o
+        yield output
+```
+
+???
+
+Even recurrent layers are _relatively_ straight forward
+
+---
+
+class: center, middle
+
+# What about theano/tensorflow/mxnet?
+
+---
+
+class: center, middle, full-bleed
+
+<img src='images/ast.svg' height=100%>
+
+???
+
+euclid's GCD algorithm
 
 ---
 
@@ -234,10 +287,20 @@ class: center, middle
 
 library    | widely used | auto-diff | gpu/cpu | mobile | frontend | models | multi-gpu | speed
 ---------- | ----------- | --------- | ------- | ------ | -------- | ------ | --------- | -----
+numpy      |     ✔️️       |     ✖️️     |   ✖️️     |   ✖️️    |    ✖️️     |   ✖️️    |    ✖️️      | slow
 theano     |     ✔️️       |     ✔️️     |   ✔️️     |   ✖️️    |    ✖️️     |   ✖️️    |    ✖️️      | fast
 mx-net     |     ✖️️       |     ✔️️     |   ✔️️     |   ✔️️    |    ✔️️     |   ✔️️    |    ✔️️      | fast
 tensorflow |     ✔️️       |     ✔️️     |   ✔️️     |   ✖️️    |    ✔️️     |   ✔️️    |    ➖     | slow
 
+???
+
+- Theano: Like writing assembly code... not much high level API to help you out
+  but your code is quick!
+- Tensorflow: Trying to straddle the line between assembly and python... low
+  level backend is accessible but it also comes with many high level functions
+  already implemented (like most classic layers already implemented, nice UI, etc) 
+- MX-Net: like tensorflow but with more of an emphasis on the high level
+  functions and on portablility/hardware/speed.
 
 ---
 
@@ -291,7 +354,7 @@ $ cat ~/.keras/keras.json
 
 class: middle, center
 
-(coming [soon](https://github.com/dmlc/mxnet/issues/4173),
+(coming [soon](https://github.com/dmlc/mxnet/issues/4173)...
 [hopefully](https://github.com/shivarajugowda/keras/commits/master))
 ```bash
 $ cat ~/.keras/keras.json
@@ -332,11 +395,7 @@ class: middle, center
 from keras.models import Sequential
 from keras.layers.core import Dense
 
-# Same as our "deep" Logistic Regression with:
-#    weights_inner.shape = (512, 128)
-#    biases_inner.shape = (128,)
-#    weights_outer.shape = (128, 4)
-#    biases_outer.shape = (4,)
+# Same as our "deep" Logistic Regression
 model = Sequential()
 model.add(Dense(128, activation='tanh', input_shape=[512]))
 model.add(Dense(4, activation='softmax'))
@@ -347,8 +406,53 @@ model.fit(X, y)
 ---
 
 class: center, middle
+```
+model_lr.summary()
+# __________________________________________________________________________
+# Layer (type)              Output Shape    Param #     Connected to
+# ==========================================================================
+# dense_1 (Dense)           (None, 4)       2052        dense_input_1[0][0]
+# ==========================================================================
+# Total params: 2,052
+# Trainable params: 2,052
+# Non-trainable params: 0
+# __________________________________________________________________________
+
+model.summary()
+# ___________________________________________________________________
+# Layer (type)       Output Shape    Param #     Connected to
+# ===================================================================
+# dense_2 (Dense)    (None, 128)     65664       dense_input_2[0][0]
+# ___________________________________________________________________
+# dense_3 (Dense)    (None, 4)       516         dense_2[0][0]
+# ===================================================================
+# Total params: 66,180
+# Trainable params: 66,180
+# Non-trainable params: 0
+# ___________________________________________________________________
+```
+
+---
+
+class: center, middle
 
 # let's build something
+
+???
+
+So...
+
+ - Summarization is intrinsically important
+
+ - We built three working examples: one is extremely simple and demonstrates
+   the steps at a high level, one uses a ~10 year old innovation called topic
+   modelling, and one uses a couple of ~2 year old innovations called recurrent
+   neural networks and language embeddings)
+
+ - Step 1 of any good summarization algorithm is also step 1 of any other
+   algorithm dealing with language, so these breakthroughs are important even
+   if you don't have a need for summarization. It's fundamental to working with
+   human language on computers.
 
 ---
 
@@ -400,6 +504,8 @@ class: center, middle
 
 <img src="images/hans_luhn.jpeg">
 
+### [fastforwardlabs.com/luhn/](http://fastforwardlabs.com/luhn/)
+
 ???
 
 This story starts in the 1950's with *Hans Peter Luhn* with his heuristics based
@@ -450,25 +556,6 @@ specifics words, but these are just band aids.
 
 class: center, middle
 
-<img src='images/bagofwords.png' width=100%>
-
-???
-
-And it's with this that we can see the biggest problem with Luhn's method... the
-only understanding we have of the language is coming from the bag of words
-approach in the vectorization step!
-
-This kind of works. It throws away word order (see "dog bites man" and "man
-bites dog"), negation ("not good" is split into two words). But let's see how
-far we can get using this as the vectorize step.
-
-[Luhn demo](http://www.fastforwardlabs.com/luhn/)
-
-
----
-
-class: center, middle
-
 <img src="images/overview_vectorize-score-select.png" width="35%">
 
 ???
@@ -477,9 +564,10 @@ Looking at the algorithm though, we can split it apart into distinct phases
 which seem to follow us regardless of which specific summarization algorithm we
 are talking about.
 
-First you **vectorize**, which means turn each sentence in the text into numbers.
-Machines only speak numbers. You want to do this in a way that preserves and
-makes accessible to the computer as much of the meaning as possible.
+First you **vectorize**, which means turn each sentence in the text **into
+numbers**.  Machines only speak numbers. You want to do this in a way that
+preserves and makes accessible to the computer as much of the meaning as
+possible.
 
 Second the algorithm **scores** each sentence. This is done by analyzing the
 vectorized version of each sentence. How you get from vector to score depends
@@ -495,6 +583,24 @@ that the rest of the algorithm builds on. And doing a good job here also lays
 foundations for other language tasks (simplification, translation, audio to
 text, image to caption, semantic search, etc.) And it's innovations in this
 step that lead us to write this report now. 
+
+---
+
+class: center, middle
+
+<img src='images/bagofwords.png' width=100%>
+
+???
+
+And it's with this that we can see the biggest problem with Luhn's method... the
+only understanding we have of the language is coming from the bag of words
+approach in the vectorization step!
+
+This kind of works. It throws away word order (see "dog bites man" and "man
+bites dog"), negation ("not good" is split into two words). But let's see how
+far we can get using this as the vectorize step.
+
+[Luhn demo](http://www.fastforwardlabs.com/luhn/)
 
 ---
 
@@ -553,6 +659,12 @@ class: center, middle
 
 <img src="images/rnn-background_skipgram.png" width="100%">
 
+```
+def skipgram(words):
+    for i in range(1, len(words)-1):
+        yield words[i], (words[i-1], words[i+1])
+```
+
 ???
 
 Word2vec came out a in 2013 uses skipgrams to train a neural network to
@@ -607,6 +719,30 @@ pre-written text and without any supervision in the classic sense.
 
 ---
 
+class: center, middle
+
+```
+from keras.models import Model
+from keras.layers import (Input, Embedding, Merge,
+                          Lambda, Activation)
+
+vector_size=300
+word_index = Input(shape=1)
+word_point = Input(shape=1)
+
+syn0 = Embedding(len(vocab), vector_size)(word_index)
+syn1= Embedding(len(vocab), vector_size)(word_point)
+
+merge = Merge([syn0, syn1], mode='mul')
+merge_sum = Lambda(lambda x: x.sum(axis=-1))(merge)
+context = Activation('sigmoid')(merge_sum)
+
+model = Model(input=[word, context], output=output)
+model.compile(loss='binary_crossentropy', optimizer='adam')
+```
+
+---
+
 class: center, middle, split-50
 
 ## Feed Forward vs Recurrent Network
@@ -634,25 +770,6 @@ But a couple of years ago, researchers figured out how to chain together neural
 networks (and crucially, how to train these chains). This allows input or
 output of arbitrary size to be fed in or out as a sequence with order. These
 are recurrent neural networks.
-
----
-
-class: center, middle
-
-## LSTM
-<img src="images/rnn_lstm.png" width="60%">
-
-???
-
-None of this would have been possible without the advent of the LSTM (Long Short
-Term Memory).  Recurrent neural networks have been known about for a long time
-but they were impossible to train because of a problem called the *vanishing
-gradient problem*.
-
-The LSTM has a memory inside of it that let's it remember what it's previously
-seen in the sequence and it knows how to apply it to the current input.  So, the
-output for the word "the" will be different depending on what words I send it in
-before.
 
 ---
 
@@ -720,24 +837,13 @@ class: center, middle
 
 class: left, middle
 
-## Example: imports
-
-```
-from keras.models import Model
-from keras.layers.recurrent import LSTM
-from keras.layers.core import TimeDistributedDense
-from skipthoughts import skipthoughts
-
-from .utils import load_data
-```
-
----
-
-class: left, middle
-
 ## Example: proprocess
 
 ```
+from skipthoughts import skipthoughts
+
+from .utils import load_data
+
 (articles, scores), (articles_test, scores_test) = load_data()
 articles_vectors = skipthoughts.encode(articles)
 articles_vectors_test = skipthoughts.encode(articles_test)
@@ -750,10 +856,15 @@ class: left, middle
 ## Example: model def and training
 
 ```
+from keras.models import Model
+from keras.layers.recurrent import LSTM
+from keras.layers.core import Dense
+from keras.layers.wrappers import TimeDistributed
+
 model = Model()
 model.add(LSTM(512, input_shape=(None, 4800),
                dropout_W=0.3, dropout_U=0.3))
-model.add(TimeDistributedDense(1))
+model.add(TimeDistributed(Dense(1)))
 model.compile(loss='mean_absolute_error', optimizer='rmsprop')
 
 model.fit(articles_vectors, scores, validation_split=0.10)
@@ -777,6 +888,12 @@ class: center, middle, full-bleed
 
 <img src='images/breif_model.svg' height=100%>
 
+???
+
+- all the dense networks share the same weights... that's why it's called
+  timedistributed
+- give dropout story
+
 ---
 
 class: left, middle
@@ -786,6 +903,7 @@ class: left, middle
 ```
 from keras.models import load_model
 from flask import Flask, request
+import nltk
 
 app = Flask(__name__)
 model = load_model("models/new_model.h5")
@@ -793,8 +911,9 @@ model = load_model("models/new_model.h5")
 @app.route('/api/evaluate', methods=['POST'])
 def evaluate():
     article = request.data
-    article_vectors = skipthoughts.encode([article])
-    return model.predict(article_vectors)
+    sentences = nltk.sent_tokenize(article)
+    sentence_vectors = skipthoughts.encode(sentences)
+    return model.predict(sentence_vectors)
 ```
 
 ---
@@ -835,6 +954,7 @@ class: center, middle
 - Hope you have a GPU
 - Hyper-parameters for all!
 - Structure of model can change where it's applicable
+- SGD means random initialization... may need to fit multiple times
 ]
 
 ???
@@ -845,6 +965,12 @@ introduces problems like luhn of synonyms (although using quotes mitigates this)
 - structure of model and hyper-parameters can change a lot... 
     - articles are good with RNN's, fiction is better with a feed forward
     - training window of data changes how long of an argument it looks for, etc
+
+---
+
+class: center, middle, full-bleed
+
+<img src="images/nn_flowchart.png" height=640px>
 
 ---
 
@@ -871,7 +997,7 @@ class: middle, center
 
 # deploy?
 
-<img src="images/easyinstall.gif" width=100%>
+<img src="images/easyinstall.gif" height=100%>
 
 ---
 
@@ -893,7 +1019,7 @@ class: middle, center
 
 class: center, middle, full-bleed
 
-<img src='images/deploy.svg' width=100%>
+<img src='images/deploy.svg' width=70%>
 
 ---
 
@@ -901,7 +1027,7 @@ class: center, middle
 
 # careful: data drift
 
-### set monitoring on the distribution of results
+#### set monitoring on the distribution of results
 
 ---
 
@@ -958,16 +1084,16 @@ We're really excited about this stuff!
 
 ---
 
-class: middle, split-60
+class: middle, split-50
 
 # Emerging Applications
 
 .column[
-- Alerting with summaries of breaking news
-- Faster understanding of large text content
-- Multi-document analysis
-- Summarize text with other forms of media
-- SUMMARIZE THE ENTIRE INTERNET USING CAT PICTURES!
+- Text Generation
+- Audio Generation
+- Event Detection
+- Intent Identification
+- Decision Making
 ]
 
 .column[
@@ -984,7 +1110,7 @@ class: center, middle
 
 <img src="images/ff-logo-vertical-transparent-bg.png">
 
-<marquee><img src="images/underconstruction.gif" height=100px></marquee>
+<marquee><img src="images/thanks.gif" height=200></marquee>
 ???
 
 Thank you!

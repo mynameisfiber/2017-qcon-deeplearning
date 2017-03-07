@@ -86,11 +86,12 @@
     <script>
     var hljs = remark.highlighter.engine;
     var slideshow = remark.create({
-              //ratio: '16:9',
+            ratio: '16:9',
             highlightStyle: 'monokai',
             highlightLanguage: 'python',
             highlightLines: true,
-            sourceUrl: 'presentation.md'
+            sourceUrl: 'presentation.md',
+            //slideNumberFormat: ''
     });
     // Setup MathJax
     MathJax.Hub.Config({
@@ -108,26 +109,23 @@
     MathJax.Hub.Configured();
     </script>
 
-    <!--
-    <img id='cats'>
     <script>
-    var catImage = document.getElementById("cats");
-    function getRandomIntInclusive(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-    function newCat(catIdx) {
-        catIdx = catIdx || getRandomIntInclusive(1, 17);
-        newImage = "images/catbackground/cat" +
-                   ("000" + catIdx).slice(-2) +
-                   ".png";
-        catImage.src = newImage;
-    }
-    setTimeout(function() {
-        newCat(6);
-        setInterval(newCat, 60 * 1000);
-    }, 30 * 1000);
+    //function getRandomIntInclusive(min, max) {
+    //    return Math.floor(Math.random() * (max - min + 1)) + min;
+    //}
+    //function newCat(catIdx) {
+    //    catIdx = catIdx || getRandomIntInclusive(1, 17);
+    //    newImage = "images/catbackground/cat" +
+    //               ("000" + catIdx).slice(-2) +
+    //               ".png";
+    //    $('#cats').attr('src', newImage);
+    //}
+    //setTimeout(function() {
+    //    $("body").append("<img src='' id='cats'>");
+    //    newCat(6);
+    //    setInterval(newCat, 10 * 1000);
+    //}, 5 * 1000);
 
     </script>
-    -->
   </body>
 </html>
