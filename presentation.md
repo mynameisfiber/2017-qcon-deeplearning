@@ -273,6 +273,18 @@ class: center, middle
 
 ---
 
+class: center, middle
+
+# what happens here?
+```
+import numpy as np
+
+a = np.random.random(100) - 0.5
+a[a < 0] = 10
+```
+
+---
+
 class: center, middle, full-bleed
 
 <img src='images/ast.svg' height=100%>
